@@ -1,4 +1,4 @@
-import { KasookooClient } from "@reverse-engineer/kasookoo-sdk"
+import { KasookooClient } from "kasookoo-sdk"
 import { customCallWindow } from "../customCallWindow"
 import { subscribeToKasookooEvents, type KasookooEventHandlers } from "./events"
 
@@ -14,12 +14,23 @@ import { subscribeToKasookooEvents, type KasookooEventHandlers } from "./events"
 export async function initKasookoo(
     email: string,
     publishableKey: string,
-    options: { useCustomWindow?: boolean; handlers: KasookooEventHandlers }
+    options: {
+        useCustomWindow?: boolean
+        loggingEnabled?: boolean
+        telemetryEnabled?: boolean
+        /** Optional — the SDK falls back to its own default OTLP endpoint when omitted. */
+        telemetryEndpoint?: string
+        handlers: KasookooEventHandlers
+    }
 ): Promise<KasookooClient> {
     const client = await KasookooClient.init({
         publishableKey,
         subject: email,
         callWindow: options.useCustomWindow ? customCallWindow : undefined,
+        logging: { enabled: options.loggingEnabled ?? true, service: "kasookoo-sdk-test-app" },
+        telemetry: options.telemetryEnabled
+            ? { enabled: true, endpoint: options.telemetryEndpoint || undefined, serviceName: "kasookoo-sdk-test-app" }
+            : undefined,
     })
     subscribeToKasookooEvents(client, options.handlers)
     return client

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react"
-import type { ChatMessage, Conversation } from "@reverse-engineer/kasookoo-sdk"
+import type { ChatMessage, Conversation } from "kasookoo-sdk"
 import { useKasookoo } from "../store/kasookoo"
 import * as kasookoo from "../kasookoo"
 import { Badge, Button, EmptyState, Field, Input, Panel, Spinner } from "../components/ui"
@@ -22,6 +22,8 @@ export function MessagingScreen() {
     const [convUnread, setConvUnread] = useState<number | null>(null)
 
     const [composeOpen, setComposeOpen] = useState(false)
+    const [deletingConv, setDeletingConv] = useState(false)
+    const [deletingMsgId, setDeletingMsgId] = useState<string | null>(null)
 
     const loadUnread = useCallback(async () => {
         if (!client) return
@@ -114,6 +116,39 @@ export function MessagingScreen() {
         }
     }
 
+    const deleteConversation = async () => {
+        if (!client || !selected) return
+        if (!window.confirm(`Delete conversation with ${selected.participant_name ?? selected.participant_user_id}? This deletes its messages too.`)) return
+        setDeletingConv(true)
+        try {
+            const res = await kasookoo.deleteConversation(client, selected.conversation_id)
+            addLog(`deleteConversation → ${res.conversation_id}`, "ok")
+            setSelected(null)
+            setMessages([])
+            setConvUnread(null)
+            await loadConversations()
+            void loadUnread()
+        } catch (err) {
+            addLog(`deleteConversation failed ${describeError(err)}`, "err")
+        } finally {
+            setDeletingConv(false)
+        }
+    }
+
+    const deleteMessage = async (messageId: string) => {
+        if (!client) return
+        setDeletingMsgId(messageId)
+        try {
+            const res = await kasookoo.deleteMessage(client, messageId)
+            addLog(`deleteMessage → ${res.message_id}`, "ok")
+            setMessages((prev) => prev.filter((m) => m.id !== messageId))
+        } catch (err) {
+            addLog(`deleteMessage failed ${describeError(err)}`, "err")
+        } finally {
+            setDeletingMsgId(null)
+        }
+    }
+
     const shareLocation = async () => {
         if (!client || !auth || !selected) return
         setSending(true)
@@ -201,7 +236,14 @@ export function MessagingScreen() {
                     title={selected ? (selected.participant_name ?? selected.participant_user_id) : "Thread"}
                     description={selected ? selected.room_name : "Pick a conversation to read it."}
                     actions={
-                        selected && convUnread != null ? <Badge>{convUnread} unread here</Badge> : undefined
+                        selected ? (
+                            <div className="flex items-center gap-2">
+                                {convUnread != null ? <Badge>{convUnread} unread here</Badge> : null}
+                                <Button variant="secondary" onClick={() => void deleteConversation()} loading={deletingConv}>
+                                    Delete conversation
+                                </Button>
+                            </div>
+                        ) : undefined
                     }
                 >
                     {!selected ? (
@@ -216,7 +258,15 @@ export function MessagingScreen() {
                                 ) : (
                                     [...messages]
                                         .sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime())
-                                        .map((msg) => <MessageBubble key={msg.id} message={msg} meId={auth?.user.id} />)
+                                        .map((msg) => (
+                                            <MessageBubble
+                                                key={msg.id}
+                                                message={msg}
+                                                meId={auth?.user.id}
+                                                onDelete={() => void deleteMessage(msg.id)}
+                                                deleting={deletingMsgId === msg.id}
+                                            />
+                                        ))
                                 )}
                             </div>
 
@@ -246,26 +296,48 @@ export function MessagingScreen() {
     )
 }
 
-function MessageBubble({ message, meId }: { message: ChatMessage; meId?: string }) {
+function MessageBubble({
+    message,
+    meId,
+    onDelete,
+    deleting,
+}: {
+    message: ChatMessage
+    meId?: string
+    onDelete: () => void
+    deleting: boolean
+}) {
     const mine = message.sender_user_id === meId
     const coords = parseLocation(message.message)
     return (
-        <div className={`flex flex-col gap-1 rounded-xl px-3 py-2 text-sm ${
-            mine ? "ml-auto bg-accent text-accent-foreground" : "mr-auto bg-surface-secondary"
-        } max-w-[80%]`}>
-            <div>
-                {coords ? (
-                    <a
-                        className="underline"
-                        href={`https://www.openstreetmap.org/?mlat=${coords.lat}&mlon=${coords.lng}#map=15/${coords.lat}/${coords.lng}`}
-                        target="_blank"
-                        rel="noreferrer"
-                    >
-                        📍 {coords.lat.toFixed(5)}, {coords.lng.toFixed(5)}
-                    </a>
-                ) : (
-                    message.message
-                )}
+        <div
+            className={`group flex flex-col gap-1 rounded-xl px-3 py-2 text-sm ${
+                mine ? "ml-auto bg-accent text-accent-foreground" : "mr-auto bg-surface-secondary"
+            } max-w-[80%]`}
+        >
+            <div className="flex items-start gap-2">
+                <div className="flex-1">
+                    {coords ? (
+                        <a
+                            className="underline"
+                            href={`https://www.openstreetmap.org/?mlat=${coords.lat}&mlon=${coords.lng}#map=15/${coords.lat}/${coords.lng}`}
+                            target="_blank"
+                            rel="noreferrer"
+                        >
+                            📍 {coords.lat.toFixed(5)}, {coords.lng.toFixed(5)}
+                        </a>
+                    ) : (
+                        message.message
+                    )}
+                </div>
+                <button
+                    onClick={onDelete}
+                    disabled={deleting}
+                    title="Delete message"
+                    className="shrink-0 rounded px-1 text-xs opacity-0 transition-opacity hover:bg-black/10 group-hover:opacity-70 disabled:opacity-100"
+                >
+                    {deleting ? "…" : "✕"}
+                </button>
             </div>
             <div className="text-[10px] opacity-70">
                 {message.channel !== "normal" ? `${message.channel} · ` : ""}

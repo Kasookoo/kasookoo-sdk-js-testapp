@@ -10,6 +10,9 @@ const KEYS = {
     connected: "kasookoo.connected",
     customWindow: "kasookoo.customWindow",
     screen: "kasookoo.screen",
+    loggingEnabled: "kasookoo.loggingEnabled",
+    telemetryEnabled: "kasookoo.telemetryEnabled",
+    telemetryEndpoint: "kasookoo.telemetryEndpoint",
 } as const
 
 function read<T>(key: string): T | null {
@@ -51,6 +54,16 @@ export const storage = {
 
     getCustomWindow: () => read<boolean>(KEYS.customWindow) === true,
     setCustomWindow: (value: boolean) => write(KEYS.customWindow, value),
+
+    /** Structured console logging — on by default, same as the SDK's own default. */
+    getLoggingEnabled: () => read<boolean>(KEYS.loggingEnabled) ?? true,
+    setLoggingEnabled: (value: boolean) => write(KEYS.loggingEnabled, value),
+
+    getTelemetryEnabled: () => read<boolean>(KEYS.telemetryEnabled) === true,
+    setTelemetryEnabled: (value: boolean) => write(KEYS.telemetryEnabled, value),
+
+    getTelemetryEndpoint: () => read<string>(KEYS.telemetryEndpoint) ?? "",
+    setTelemetryEndpoint: (value: string) => write(KEYS.telemetryEndpoint, value),
 
     getScreen: () => read<string>(KEYS.screen),
     setScreen: (value: string) => write(KEYS.screen, value),

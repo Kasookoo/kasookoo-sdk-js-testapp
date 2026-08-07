@@ -5,7 +5,7 @@ import type {
     AssociatedNumbersResponse,
     CreateAssociatedNumberParams,
     KasookooClient,
-} from "@reverse-engineer/kasookoo-sdk"
+} from "kasookoo-sdk"
 
 export function listAssociatedNumbers(client: KasookooClient, query: AssociatedNumberQuery): Promise<AssociatedNumbersResponse> {
     return client.getAssociatedNumbers(query)

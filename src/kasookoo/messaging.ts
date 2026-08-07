@@ -1,11 +1,13 @@
 import type {
     ChatMessage,
     ConversationsResponse,
+    DeleteConversationResponse,
+    DeleteMessageResponse,
     KasookooClient,
     MessagesResponse,
     SendMessageResponse,
     UnreadCountResponse,
-} from "@reverse-engineer/kasookoo-sdk"
+} from "kasookoo-sdk"
 
 export function loadConversations(client: KasookooClient, limit = 50): Promise<ConversationsResponse> {
     return client.getConversations({ limit })
@@ -54,4 +56,14 @@ export function sendLocation(
     params: { senderUserId: string; receiverUserId: string; roomName: string }
 ): Promise<SendMessageResponse> {
     return client.sendLocation(params)
+}
+
+/** Deletes a conversation along with its messages. */
+export function deleteConversation(client: KasookooClient, conversationId: string): Promise<DeleteConversationResponse> {
+    return client.deleteConversation(conversationId)
+}
+
+/** Deletes a single message. */
+export function deleteMessage(client: KasookooClient, messageId: string): Promise<DeleteMessageResponse> {
+    return client.deleteMessage(messageId)
 }

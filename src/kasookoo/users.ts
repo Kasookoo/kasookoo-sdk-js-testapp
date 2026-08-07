@@ -5,7 +5,7 @@ import type {
     UserListResponse,
     UserQuery,
     UserRecord,
-} from "@reverse-engineer/kasookoo-sdk"
+} from "kasookoo-sdk"
 
 export function listUsers(client: KasookooClient, query: UserQuery): Promise<UserListResponse> {
     return client.getUsers(query)

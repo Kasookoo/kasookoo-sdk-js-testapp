@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react"
-import type { AssociatedNumber, AssociatedNumberType } from "@reverse-engineer/kasookoo-sdk"
+import type { AssociatedNumber, AssociatedNumberType } from "kasookoo-sdk"
 import { useKasookoo } from "../store/kasookoo"
 import {
     createAssociatedNumber,

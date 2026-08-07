@@ -10,6 +10,12 @@ export function ConnectScreen() {
         setPublishableKey,
         useCustomWindow,
         setUseCustomWindow,
+        loggingEnabled,
+        setLoggingEnabled,
+        telemetryEnabled,
+        setTelemetryEnabled,
+        telemetryEndpoint,
+        setTelemetryEndpoint,
         connect,
         status,
         error,
@@ -57,6 +63,47 @@ export function ConnectScreen() {
                         <span className="block text-xs text-foreground/50">the dark example in src/customCallWindow.ts</span>
                     </span>
                 </label>
+
+                <label className="flex items-center gap-2 text-sm">
+                    <input
+                        type="checkbox"
+                        checked={loggingEnabled}
+                        onChange={(e) => setLoggingEnabled(e.target.checked)}
+                    />
+                    <span>
+                        Structured console logging
+                        <span className="block text-xs text-foreground/50">
+                            LiveKit-style JSON logs to the browser console — on by default
+                        </span>
+                    </span>
+                </label>
+
+                <label className="flex items-center gap-2 text-sm">
+                    <input
+                        type="checkbox"
+                        checked={telemetryEnabled}
+                        onChange={(e) => setTelemetryEnabled(e.target.checked)}
+                    />
+                    <span>
+                        OpenTelemetry trace export
+                        <span className="block text-xs text-foreground/50">
+                            requires the @opentelemetry/* peer packages — see the SDK README
+                        </span>
+                    </span>
+                </label>
+
+                {telemetryEnabled ? (
+                    <Field
+                        label="OTLP traces endpoint"
+                        hint="Optional — leave blank to use the SDK's default dev/test collector."
+                    >
+                        <Input
+                            value={telemetryEndpoint}
+                            placeholder="https://monitoring-test.kasookoo.ai/v1/traces"
+                            onChange={(e) => setTelemetryEndpoint(e.target.value)}
+                        />
+                    </Field>
+                ) : null}
 
                 {error ? <p className="text-sm text-danger">{error}</p> : null}
 

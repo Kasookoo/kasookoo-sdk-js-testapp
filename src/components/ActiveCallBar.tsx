@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-import type { Call, CallState } from "@reverse-engineer/kasookoo-sdk"
+import type { Call, CallState } from "kasookoo-sdk"
 import { useKasookoo } from "../store/kasookoo"
 import { endCall, getActiveCall, setCallMuted } from "../kasookoo"
 import { Badge, Button } from "./ui"

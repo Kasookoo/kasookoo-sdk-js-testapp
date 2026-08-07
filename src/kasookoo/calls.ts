@@ -1,6 +1,6 @@
-import type { Call, KasookooClient } from "@reverse-engineer/kasookoo-sdk"
+import type { Call, KasookooClient } from "kasookoo-sdk"
 
-/** The fields an in-app call needs to know about each side. */
+
 export interface CallParty {
     id: string
     name: string
@@ -9,7 +9,6 @@ export interface CallParty {
     role: string
 }
 
-/** Places an in-app call from `caller` to `callee`. */
 export function placeCall(client: KasookooClient, caller: CallParty, callee: CallParty): Promise<Call> {
     return client.initCall({
         roomName: `room_${caller.id}_${callee.id}_${Date.now()}`,
@@ -47,7 +46,7 @@ export function setCallMuted(call: Call, muted: boolean): Promise<void> {
     return call.setMuted(muted)
 }
 
-/** The call currently connecting/connected, if any — the SDK allows only one. */
+
 export function getActiveCall(client: KasookooClient): Call | null {
     return client.activeCall
 }

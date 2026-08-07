@@ -1,4 +1,4 @@
-import type { CdrExportParams, CdrQuery, CdrResponse, KasookooClient } from "@reverse-engineer/kasookoo-sdk"
+import type { CdrExportParams, CdrQuery, CdrResponse, KasookooClient } from "kasookoo-sdk"
 
 export function listCdr(client: KasookooClient, query: CdrQuery): Promise<CdrResponse> {
     return client.getCdr(query)

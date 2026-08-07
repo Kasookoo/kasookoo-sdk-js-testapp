@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react"
-import type { UserRecord } from "@reverse-engineer/kasookoo-sdk"
+import type { UserRecord } from "kasookoo-sdk"
 import { useKasookoo } from "../store/kasookoo"
 import { createUser, deleteUser, getUser, listUsers, updateUser } from "../kasookoo"
 import { Badge, Button, EmptyState, Field, Input, Pagination, Panel, Spinner } from "../components/ui"

@@ -1,4 +1,4 @@
-import type { Call, CallState, KasookooClient, KasookooError, SessionInfo } from "@reverse-engineer/kasookoo-sdk"
+import type { Call, CallState, KasookooClient, KasookooError, KasookooEvents, SessionInfo } from "kasookoo-sdk"
 
 /**
  * One callback per event the SDK can emit. Every field is optional — wire up
@@ -14,6 +14,8 @@ export interface KasookooEventHandlers {
     onCallStateChange?: (call: Call, state: CallState) => void
     onCallEnded?: (call: Call) => void
     onNotification?: (data: Record<string, string>) => void
+    /** One per SDK HTTP request — correlation ids for logging/tracing. See README "Correlation & tracing". */
+    onTrace?: (info: KasookooEvents["trace:request"]) => void
     onError?: (error: KasookooError) => void
 }
 
@@ -34,5 +36,6 @@ export function subscribeToKasookooEvents(client: KasookooClient, handlers: Kaso
         })
     })
     client.on("notification:message", (data) => handlers.onNotification?.(data))
+    client.on("trace:request", (info) => handlers.onTrace?.(info))
     client.on("error", (err) => handlers.onError?.(err))
 }

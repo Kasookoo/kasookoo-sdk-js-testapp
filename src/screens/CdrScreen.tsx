@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react"
-import type { CdrEntry } from "@reverse-engineer/kasookoo-sdk"
+import type { CdrEntry } from "kasookoo-sdk"
 import { useKasookoo } from "../store/kasookoo"
 import { downloadCdr as downloadCdrFile, listCdr } from "../kasookoo"
 import { Badge, Button, EmptyState, Field, Input, Pagination, Panel, Spinner } from "../components/ui"

@@ -1,4 +1,4 @@
-import type { CallWindowRenderer } from "@reverse-engineer/kasookoo-sdk"
+import type { CallWindowRenderer } from "kasookoo-sdk"
 
 /**
  * Example custom call window — demonstrates the `CallWindowRenderer` contract
