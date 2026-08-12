@@ -13,13 +13,14 @@ export function CallsScreen() {
     const [search, setSearch] = useState("")
     const [role, setRole] = useState("")
     const canListUsers = has("user")
+    const canCall = !!auth?.user.phone_number
 
     const fetchUsers = useCallback(async () => {
         if (!client || !canListUsers) return
         setBusy(true)
         try {
             const res = await listUsers(client, { search: search.trim() || undefined, role: role || undefined, limit: 50 })
-            setUsers(res.items)
+            setUsers(res.items.filter((u) => !!u.phone_number))
             addLog(`getUsers → ${res.items.length} of ${res.pagination.total}`, "ok")
         } catch (err) {
             addLog(`getUsers failed ${describeError(err)}`, "err")
@@ -35,7 +36,7 @@ export function CallsScreen() {
     }, [client, role])
 
     const call = async (target: UserRecord) => {
-        if (!client || !auth) return
+        if (!client || !auth || !canCall) return
         const me = auth.user
         addLog(`initCall → ${fullName(target)}`)
         try {
@@ -61,6 +62,15 @@ export function CallsScreen() {
             </header>
 
             <ActiveCallBar />
+
+            {!canCall ? (
+                <Panel title="In-app calls disabled">
+                    <EmptyState
+                        title="Your logged-in account has no phone number on file"
+                        hint="initCall requires the caller to have name, email, phoneNumber and type. Sign in as an account with a phone number to place calls."
+                    />
+                </Panel>
+            ) : null}
 
             {incoming.length > 0 ? (
                 <Panel title="Ringing" description="Delivered by push. Each declines itself after a minute.">
@@ -140,7 +150,7 @@ export function CallsScreen() {
                                     </p>
                                     <p className="text-xs text-foreground/50">{user.email}</p>
                                 </div>
-                                <Button variant="teal" onClick={() => void call(user)}>
+                                <Button variant="teal" onClick={() => void call(user)} disabled={!canCall}>
                                     Call
                                 </Button>
                             </div>
