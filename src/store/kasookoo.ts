@@ -126,7 +126,18 @@ export const useKasookooStore = createSelectors(
                     `structured logging: ${loggingEnabled ? `on (${loggingLevels.join(", ")})` : "off"}`,
                     "ok"
                 )
-                if (telemetryEnabled) addLog(`OpenTelemetry export: on${telemetryEndpoint ? ` → ${telemetryEndpoint}` : " (default endpoint)"}`, "ok")
+                if (telemetryEnabled) {
+                    addLog(
+                        `OpenTelemetry export: on${telemetryEndpoint ? ` → ${telemetryEndpoint}` : " (default endpoint)"}`,
+                        "ok"
+                    )
+                    if (!loggingEnabled) {
+                        addLog(
+                            "logging.enabled and telemetry.enabled are independent — console is silent but OTel still receives every log line",
+                            "ok"
+                        )
+                    }
+                }
             } catch (err) {
                 clientRef = null
                 storage.setConnected(false)

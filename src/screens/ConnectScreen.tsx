@@ -136,6 +136,13 @@ export function ConnectScreen() {
                     </Field>
                 ) : null}
 
+                {!loggingEnabled && telemetryEnabled ? (
+                    <p className="rounded-lg border border-accent/30 bg-accent/10 p-2 text-xs text-foreground/70">
+                        Console logging is off, but OTel export stays on — the two are independent switches. Every
+                        log line (all levels) still reaches your OTLP collector; only the browser console is quiet.
+                    </p>
+                ) : null}
+
                 {error ? <p className="text-sm text-danger">{error}</p> : null}
 
                 <Button onClick={() => void connect()} loading={connecting} disabled={!publishableKey.trim()}>
