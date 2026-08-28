@@ -1,6 +1,9 @@
+import type { LogLevel } from "kasookoo-sdk"
 import { useKasookoo } from "../store/kasookoo"
 import { Button, Field, Input } from "../components/ui"
 import { fullName } from "../lib/format"
+
+const LOG_LEVELS: LogLevel[] = ["debug", "info", "warn", "error"]
 
 /** Collects the publishable key and calls `init()`. Shown until the SDK is ready. */
 export function ConnectScreen() {
@@ -12,6 +15,8 @@ export function ConnectScreen() {
         setUseCustomWindow,
         loggingEnabled,
         setLoggingEnabled,
+        loggingLevels,
+        setLoggingLevels,
         telemetryEnabled,
         setTelemetryEnabled,
         telemetryEndpoint,
@@ -77,6 +82,32 @@ export function ConnectScreen() {
                         </span>
                     </span>
                 </label>
+
+                {loggingEnabled ? (
+                    <Field
+                        label="Log level(s)"
+                        hint='Exact set, not a minimum — e.g. picking only "error" hides "warn" too. Defaults to info + warn + error.'
+                    >
+                        <div className="flex flex-wrap gap-3">
+                            {LOG_LEVELS.map((level) => (
+                                <label key={level} className="flex items-center gap-1.5 text-sm">
+                                    <input
+                                        type="checkbox"
+                                        checked={loggingLevels.includes(level)}
+                                        onChange={(e) =>
+                                            setLoggingLevels(
+                                                e.target.checked
+                                                    ? [...loggingLevels, level]
+                                                    : loggingLevels.filter((l) => l !== level)
+                                            )
+                                        }
+                                    />
+                                    <span className="capitalize">{level}</span>
+                                </label>
+                            ))}
+                        </div>
+                    </Field>
+                ) : null}
 
                 <label className="flex items-center gap-2 text-sm">
                     <input

@@ -1,5 +1,5 @@
 import { create } from "zustand"
-import type { Call, KasookooClient } from "kasookoo-sdk"
+import type { Call, KasookooClient, LogLevel } from "kasookoo-sdk"
 import { createSelectors } from "../lib/createSelectors"
 import { closeKasookoo, initKasookoo } from "../kasookoo"
 import { storage } from "../lib/storage"
@@ -21,6 +21,7 @@ interface KasookooState {
     publishableKey: string
     useCustomWindow: boolean
     loggingEnabled: boolean
+    loggingLevels: LogLevel[]
     telemetryEnabled: boolean
     telemetryEndpoint: string
     client: KasookooClient | null
@@ -37,6 +38,7 @@ interface KasookooState {
     setPublishableKey: (value: string) => void
     setUseCustomWindow: (value: boolean) => void
     setLoggingEnabled: (value: boolean) => void
+    setLoggingLevels: (value: LogLevel[]) => void
     setTelemetryEnabled: (value: boolean) => void
     setTelemetryEndpoint: (value: string) => void
     connect: () => Promise<void>
@@ -69,6 +71,7 @@ export const useKasookooStore = createSelectors(
             key: string,
             custom: boolean,
             loggingEnabled: boolean,
+            loggingLevels: LogLevel[],
             telemetryEnabled: boolean,
             telemetryEndpoint: string
         ) => {
@@ -80,6 +83,7 @@ export const useKasookooStore = createSelectors(
                 const created = await initKasookoo(account.user.email, key, {
                     useCustomWindow: custom,
                     loggingEnabled,
+                    loggingLevels,
                     telemetryEnabled,
                     telemetryEndpoint,
                     handlers: {
@@ -118,7 +122,10 @@ export const useKasookooStore = createSelectors(
                 addLog(`SDK ready · this device is registered for calls and messages`, "ok")
                 addLog(`scopes: ${granted.join(", ")}`, "ok")
                 if (custom) addLog("Using the custom call window (src/customCallWindow.ts)", "ok")
-                addLog(`structured logging: ${loggingEnabled ? "on" : "off"}`, "ok")
+                addLog(
+                    `structured logging: ${loggingEnabled ? `on (${loggingLevels.join(", ")})` : "off"}`,
+                    "ok"
+                )
                 if (telemetryEnabled) addLog(`OpenTelemetry export: on${telemetryEndpoint ? ` → ${telemetryEndpoint}` : " (default endpoint)"}`, "ok")
             } catch (err) {
                 clientRef = null
@@ -135,6 +142,7 @@ export const useKasookooStore = createSelectors(
             publishableKey: storage.getPublishableKey(),
             useCustomWindow: storage.getCustomWindow(),
             loggingEnabled: storage.getLoggingEnabled(),
+            loggingLevels: storage.getLoggingLevels() as LogLevel[],
             telemetryEnabled: storage.getTelemetryEnabled(),
             telemetryEndpoint: storage.getTelemetryEndpoint(),
             client: null,
@@ -167,6 +175,10 @@ export const useKasookooStore = createSelectors(
                 storage.setLoggingEnabled(value)
                 set({ loggingEnabled: value })
             },
+            setLoggingLevels: (value) => {
+                storage.setLoggingLevels(value)
+                set({ loggingLevels: value })
+            },
             setTelemetryEnabled: (value) => {
                 storage.setTelemetryEnabled(value)
                 set({ telemetryEnabled: value })
@@ -176,9 +188,25 @@ export const useKasookooStore = createSelectors(
                 set({ telemetryEndpoint: value })
             },
             connect: async () => {
-                const { auth, publishableKey, useCustomWindow, loggingEnabled, telemetryEnabled, telemetryEndpoint } = get()
+                const {
+                    auth,
+                    publishableKey,
+                    useCustomWindow,
+                    loggingEnabled,
+                    loggingLevels,
+                    telemetryEnabled,
+                    telemetryEndpoint,
+                } = get()
                 if (!auth || !publishableKey.trim()) return
-                await connectWith(auth, publishableKey.trim(), useCustomWindow, loggingEnabled, telemetryEnabled, telemetryEndpoint.trim())
+                await connectWith(
+                    auth,
+                    publishableKey.trim(),
+                    useCustomWindow,
+                    loggingEnabled,
+                    loggingLevels,
+                    telemetryEnabled,
+                    telemetryEndpoint.trim()
+                )
             },
             disconnect: () => {
                 teardown()
@@ -222,6 +250,8 @@ export function useKasookoo() {
         setUseCustomWindow: useKasookooStore.use.setUseCustomWindow(),
         loggingEnabled: useKasookooStore.use.loggingEnabled(),
         setLoggingEnabled: useKasookooStore.use.setLoggingEnabled(),
+        loggingLevels: useKasookooStore.use.loggingLevels(),
+        setLoggingLevels: useKasookooStore.use.setLoggingLevels(),
         telemetryEnabled: useKasookooStore.use.telemetryEnabled(),
         setTelemetryEnabled: useKasookooStore.use.setTelemetryEnabled(),
         telemetryEndpoint: useKasookooStore.use.telemetryEndpoint(),
