@@ -1,4 +1,4 @@
-import { KasookooClient } from "kasookoo-sdk"
+import { KasookooClient, type LogLevel } from "kasookoo-sdk"
 import { customCallWindow } from "../customCallWindow"
 import { subscribeToKasookooEvents, type KasookooEventHandlers } from "./events"
 
@@ -17,6 +17,12 @@ export async function initKasookoo(
     options: {
         useCustomWindow?: boolean
         loggingEnabled?: boolean
+        /**
+         * Which level(s) to show — an exact set, not a minimum threshold (see
+         * the SDK README's "Console logging"). Defaults to the SDK's own
+         * default (`["info", "warn", "error"]`) when omitted.
+         */
+        loggingLevels?: LogLevel[]
         telemetryEnabled?: boolean
         /** Optional — the SDK falls back to its own default OTLP endpoint when omitted. */
         telemetryEndpoint?: string
@@ -27,7 +33,11 @@ export async function initKasookoo(
         publishableKey,
         subject: email,
         callWindow: options.useCustomWindow ? customCallWindow : undefined,
-        logging: { enabled: options.loggingEnabled ?? true, service: "kasookoo-sdk-test-app" },
+        logging: {
+            enabled: options.loggingEnabled ?? true,
+            level: options.loggingLevels?.length ? options.loggingLevels : undefined,
+            service: "kasookoo-sdk-test-app",
+        },
         telemetry: options.telemetryEnabled
             ? { enabled: true, endpoint: options.telemetryEndpoint || undefined, serviceName: "kasookoo-sdk-test-app" }
             : undefined,

@@ -11,9 +11,13 @@ const KEYS = {
     customWindow: "kasookoo.customWindow",
     screen: "kasookoo.screen",
     loggingEnabled: "kasookoo.loggingEnabled",
+    loggingLevels: "kasookoo.loggingLevels",
     telemetryEnabled: "kasookoo.telemetryEnabled",
     telemetryEndpoint: "kasookoo.telemetryEndpoint",
 } as const
+
+/** Same default as the SDK's own `logging.level` — everything except `debug`. */
+export const DEFAULT_LOGGING_LEVELS = ["info", "warn", "error"] as const
 
 function read<T>(key: string): T | null {
     try {
@@ -58,6 +62,13 @@ export const storage = {
     /** Structured console logging — on by default, same as the SDK's own default. */
     getLoggingEnabled: () => read<boolean>(KEYS.loggingEnabled) ?? true,
     setLoggingEnabled: (value: boolean) => write(KEYS.loggingEnabled, value),
+
+    /**
+     * Which level(s) the SDK's `logging.level` shows — an exact set, not a
+     * minimum threshold. Same default as the SDK itself.
+     */
+    getLoggingLevels: () => read<string[]>(KEYS.loggingLevels) ?? [...DEFAULT_LOGGING_LEVELS],
+    setLoggingLevels: (value: string[]) => write(KEYS.loggingLevels, value),
 
     getTelemetryEnabled: () => read<boolean>(KEYS.telemetryEnabled) === true,
     setTelemetryEnabled: (value: boolean) => write(KEYS.telemetryEnabled, value),
