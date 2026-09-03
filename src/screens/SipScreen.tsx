@@ -1,6 +1,7 @@
 import { useState } from "react"
 import { useKasookoo } from "../store/kasookoo"
 import { placePhoneCall } from "../kasookoo"
+import { createCallIntent } from "../api"
 import { Button, Field, Input, Panel } from "../components/ui"
 import { describeError, fullName } from "../lib/format"
 import { ActiveCallBar } from "../components/ActiveCallBar"
@@ -17,14 +18,30 @@ export function SipScreen() {
         const phoneNumber = number.trim()
         if (!phoneNumber) return
         setBusy(true)
-        addLog(`initSipCall → ${phoneNumber}`)
         try {
-            const call = await placePhoneCall(client, { id: auth.user.id, name: fullName(auth.user) }, phoneNumber)
+            // 1. Stand-in for the integrator's own backend: get a call intent
+            // before dialing. The SDK never creates intents itself.
+            addLog(`call-intents → ${phoneNumber}`)
+            const intent = await createCallIntent(auth.access_token, {
+                phoneNumber,
+                subject: auth.user.email,
+            })
+            addLog(`call intent ${intent.intent_id} (expires in ${intent.expires_in}s)`, "ok")
+
+            // 2. Dial with the intent.
+            addLog(`initSipCall → ${phoneNumber}`)
+            const call = await placePhoneCall(
+                client,
+                { name: fullName(auth.user) },
+                phoneNumber,
+                intent.intent_id,
+                intent.client_secret
+            )
             addLog(`sip call is ${call.kind} → ${call.remote.name}`, "ok")
             call.on("state", (state) => addLog(`sip call → ${state}`, state === "connected" ? "ok" : "info"))
             call.on("error", (err) => addLog(`sip call error ${describeError(err)}`, "err"))
         } catch (err) {
-            addLog(`initSipCall failed ${describeError(err)}`, "err")
+            addLog(`dial failed ${describeError(err)}`, "err")
         } finally {
             setBusy(false)
         }

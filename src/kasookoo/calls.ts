@@ -17,15 +17,18 @@ export function placeCall(client: KasookooClient, caller: CallParty, callee: Cal
     })
 }
 
-/** Places a call to an external phone number. */
+/** Places a call to an external phone number. Requires a call intent obtained beforehand — see `createCallIntent` in `../api`. */
 export function placePhoneCall(
     client: KasookooClient,
-    caller: { id: string; name: string },
-    phoneNumber: string
+    caller: { name: string },
+    phoneNumber: string,
+    intentId: string,
+    clientSecret: string
 ): Promise<Call> {
     return client.initSipCall({
         phoneNumber,
-        roomName: `sip_${caller.id}_${Date.now()}`,
+        intentId,
+        clientSecret,
         participantName: caller.name,
     })
 }

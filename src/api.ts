@@ -61,4 +61,39 @@ export async function login(email: string, password: string): Promise<LoginResul
     })
 }
 
+// Call intents — this stands in for the integrator's own backend. In the new
+// dial flow the SDK no longer creates call intents itself: the host app's
+// backend calls its own version of this endpoint first, then hands the SDK
+// `intent_id` / `client_secret` to dial with. The real per-integrator SDK
+// hits the same underlying API; this test app just calls it directly since
+// it has no backend of its own.
+
+export interface CallIntent {
+    intent_id: string
+    client_secret: string
+    subject: string
+    phone_number: string
+    expires_in: number
+    max_duration_seconds: number
+    status: string
+}
+
+export interface CreateCallIntentParams {
+    phoneNumber: string
+    subject: string
+    maxDurationSeconds?: number
+}
+
+export function createCallIntent(token: string, params: CreateCallIntentParams): Promise<CallIntent> {
+    return botRequest<CallIntent>("/sdk/call-intents", {
+        method: "POST",
+        token,
+        body: {
+            phone_number: params.phoneNumber,
+            subject: params.subject,
+            max_duration_seconds: params.maxDurationSeconds ?? 300,
+        },
+    })
+}
+
 
