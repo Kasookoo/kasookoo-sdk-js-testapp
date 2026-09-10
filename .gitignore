@@ -26,3 +26,4 @@ tsconfig.tsbuildinfo
 *.sw?
 
 .vercel
+.env*

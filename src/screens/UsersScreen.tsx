@@ -198,6 +198,7 @@ export function UsersScreen() {
                             <table className="w-full border-collapse">
                                 <thead>
                                     <tr className="border-b border-border">
+                                        <th className={th}>ID</th>
                                         <th className={th}>Name</th>
                                         <th className={th}>Email</th>
                                         <th className={th}>Role</th>
@@ -208,6 +209,7 @@ export function UsersScreen() {
                                 <tbody className="divide-y divide-border">
                                     {users.map((user) => (
                                         <tr key={user.id}>
+                                            <td className={`${td} font-mono text-xs text-foreground/50`}>{user.id}</td>
                                             <td className={td}>{fullName(user)}</td>
                                             <td className={`${td} text-foreground/50`}>{user.email}</td>
                                             <td className={td}>
