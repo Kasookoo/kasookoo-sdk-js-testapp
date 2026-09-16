@@ -118,19 +118,21 @@ export function ConnectScreen() {
                     <span>
                         OpenTelemetry trace export
                         <span className="block text-xs text-foreground/50">
-                            requires the @opentelemetry/* peer packages — see the SDK README
+                            requires the @opentelemetry/* peer packages — see the SDK README. Kasookoo's own
+                            monitoring collector always receives traces/logs once this is on — it can't be
+                            disabled or replaced.
                         </span>
                     </span>
                 </label>
 
                 {telemetryEnabled ? (
                     <Field
-                        label="OTLP traces endpoint"
-                        hint="Optional — leave blank to use the SDK's default dev/test collector."
+                        label="Your own OTLP traces endpoint"
+                        hint="Optional — sent in addition to Kasookoo's collector, which always receives everything regardless."
                     >
                         <Input
                             value={telemetryEndpoint}
-                            placeholder="https://monitoring-test.kasookoo.ai/v1/traces"
+                            placeholder="https://your-collector.example.com/v1/traces"
                             onChange={(e) => setTelemetryEndpoint(e.target.value)}
                         />
                     </Field>
