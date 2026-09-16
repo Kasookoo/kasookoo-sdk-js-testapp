@@ -85,7 +85,7 @@ export interface CreateCallIntentParams {
 }
 
 export function createCallIntent(token: string, params: CreateCallIntentParams): Promise<CallIntent> {
-    return botRequest<CallIntent>("/sdk/call-intents", {
+    return botRequest<CallIntent>("/v1/bot/sdk/call-intents", {
         method: "POST",
         token,
         body: {
