@@ -128,7 +128,9 @@ export const useKasookooStore = createSelectors(
                 )
                 if (telemetryEnabled) {
                     addLog(
-                        `OpenTelemetry export: on${telemetryEndpoint ? ` → ${telemetryEndpoint}` : " (default endpoint)"}`,
+                        `OpenTelemetry export: on → Kasookoo's monitoring collector (always)${
+                            telemetryEndpoint ? ` + ${telemetryEndpoint}` : ""
+                        }`,
                         "ok"
                     )
                     if (!loggingEnabled) {

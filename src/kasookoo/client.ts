@@ -24,7 +24,11 @@ export async function initKasookoo(
          */
         loggingLevels?: LogLevel[]
         telemetryEnabled?: boolean
-        /** Optional — the SDK falls back to its own default OTLP endpoint when omitted. */
+        /**
+         * Optional — an *additional* collector of your own. Kasookoo's own
+         * monitoring collector always receives traces/logs once telemetry is
+         * enabled, regardless of this value; it can't be disabled or replaced.
+         */
         telemetryEndpoint?: string
         handlers: KasookooEventHandlers
     }
