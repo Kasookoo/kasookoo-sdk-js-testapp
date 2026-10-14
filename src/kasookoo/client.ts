@@ -41,8 +41,9 @@ export async function initKasookoo(
             enabled: options.loggingEnabled ?? true,
             level: options.loggingLevels?.length ? options.loggingLevels : undefined,
             service: "kasookoo-sdk-test-app",
+            env: "test",
         },
-        telemetry: { endpoint: options.telemetryEndpoint || undefined, serviceName: "kasookoo-sdk-test-app" },
+        telemetry: { endpoint: options.telemetryEndpoint || undefined, serviceName: "kasookoo-sdk-test-app", environment: "test" },
     })
     subscribeToKasookooEvents(client, options.handlers)
     return client
