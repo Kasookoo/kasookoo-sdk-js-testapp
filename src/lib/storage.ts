@@ -12,7 +12,6 @@ const KEYS = {
     screen: "kasookoo.screen",
     loggingEnabled: "kasookoo.loggingEnabled",
     loggingLevels: "kasookoo.loggingLevels",
-    telemetryEnabled: "kasookoo.telemetryEnabled",
     telemetryEndpoint: "kasookoo.telemetryEndpoint",
 } as const
 
@@ -70,8 +69,6 @@ export const storage = {
     getLoggingLevels: () => read<string[]>(KEYS.loggingLevels) ?? [...DEFAULT_LOGGING_LEVELS],
     setLoggingLevels: (value: string[]) => write(KEYS.loggingLevels, value),
 
-    getTelemetryEnabled: () => read<boolean>(KEYS.telemetryEnabled) === true,
-    setTelemetryEnabled: (value: boolean) => write(KEYS.telemetryEnabled, value),
 
     getTelemetryEndpoint: () => read<string>(KEYS.telemetryEndpoint) ?? "",
     setTelemetryEndpoint: (value: string) => write(KEYS.telemetryEndpoint, value),

@@ -23,11 +23,11 @@ export async function initKasookoo(
          * default (`["info", "warn", "error"]`) when omitted.
          */
         loggingLevels?: LogLevel[]
-        telemetryEnabled?: boolean
         /**
          * Optional — an *additional* collector of your own. Kasookoo's own
-         * monitoring collector always receives traces/logs once telemetry is
-         * enabled, regardless of this value; it can't be disabled or replaced.
+         * monitoring collector always receives traces/logs (telemetry has no
+         * on/off switch — it runs because the @opentelemetry/* packages are
+         * installed), regardless of this value.
          */
         telemetryEndpoint?: string
         handlers: KasookooEventHandlers
@@ -42,9 +42,7 @@ export async function initKasookoo(
             level: options.loggingLevels?.length ? options.loggingLevels : undefined,
             service: "kasookoo-sdk-test-app",
         },
-        telemetry: options.telemetryEnabled
-            ? { enabled: true, endpoint: options.telemetryEndpoint || undefined, serviceName: "kasookoo-sdk-test-app" }
-            : undefined,
+        telemetry: { endpoint: options.telemetryEndpoint || undefined, serviceName: "kasookoo-sdk-test-app" },
     })
     subscribeToKasookooEvents(client, options.handlers)
     return client

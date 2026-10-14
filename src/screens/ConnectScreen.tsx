@@ -17,8 +17,6 @@ export function ConnectScreen() {
         setLoggingEnabled,
         loggingLevels,
         setLoggingLevels,
-        telemetryEnabled,
-        setTelemetryEnabled,
         telemetryEndpoint,
         setTelemetryEndpoint,
         connect,
@@ -109,39 +107,21 @@ export function ConnectScreen() {
                     </Field>
                 ) : null}
 
-                <label className="flex items-center gap-2 text-sm">
-                    <input
-                        type="checkbox"
-                        checked={telemetryEnabled}
-                        onChange={(e) => setTelemetryEnabled(e.target.checked)}
+                <Field
+                    label="Your own OTLP traces endpoint"
+                    hint="Optional. OpenTelemetry export is automatic here (the @opentelemetry/* packages are installed) and always reaches Kasookoo's collector; this adds one more of your own."
+                >
+                    <Input
+                        value={telemetryEndpoint}
+                        placeholder="https://your-collector.example.com/v1/traces"
+                        onChange={(e) => setTelemetryEndpoint(e.target.value)}
                     />
-                    <span>
-                        OpenTelemetry trace export
-                        <span className="block text-xs text-foreground/50">
-                            requires the @opentelemetry/* peer packages — see the SDK README. Kasookoo's own
-                            monitoring collector always receives traces/logs once this is on — it can't be
-                            disabled or replaced.
-                        </span>
-                    </span>
-                </label>
+                </Field>
 
-                {telemetryEnabled ? (
-                    <Field
-                        label="Your own OTLP traces endpoint"
-                        hint="Optional — sent in addition to Kasookoo's collector, which always receives everything regardless."
-                    >
-                        <Input
-                            value={telemetryEndpoint}
-                            placeholder="https://your-collector.example.com/v1/traces"
-                            onChange={(e) => setTelemetryEndpoint(e.target.value)}
-                        />
-                    </Field>
-                ) : null}
-
-                {!loggingEnabled && telemetryEnabled ? (
+                {!loggingEnabled ? (
                     <p className="rounded-lg border border-accent/30 bg-accent/10 p-2 text-xs text-foreground/70">
-                        Console logging is off, but OTel export stays on — the two are independent switches. Every
-                        log line (all levels) still reaches your OTLP collector; only the browser console is quiet.
+                        Console logging is off, but OpenTelemetry export is not: every log line (all levels) still
+                        reaches the collectors; only the browser console is quiet.
                     </p>
                 ) : null}
 

@@ -22,7 +22,6 @@ interface KasookooState {
     useCustomWindow: boolean
     loggingEnabled: boolean
     loggingLevels: LogLevel[]
-    telemetryEnabled: boolean
     telemetryEndpoint: string
     client: KasookooClient | null
     status: SdkStatus
@@ -39,7 +38,6 @@ interface KasookooState {
     setUseCustomWindow: (value: boolean) => void
     setLoggingEnabled: (value: boolean) => void
     setLoggingLevels: (value: LogLevel[]) => void
-    setTelemetryEnabled: (value: boolean) => void
     setTelemetryEndpoint: (value: string) => void
     connect: () => Promise<void>
     disconnect: () => void
@@ -72,7 +70,6 @@ export const useKasookooStore = createSelectors(
             custom: boolean,
             loggingEnabled: boolean,
             loggingLevels: LogLevel[],
-            telemetryEnabled: boolean,
             telemetryEndpoint: string
         ) => {
             if (clientRef) return
@@ -84,7 +81,6 @@ export const useKasookooStore = createSelectors(
                     useCustomWindow: custom,
                     loggingEnabled,
                     loggingLevels,
-                    telemetryEnabled,
                     telemetryEndpoint,
                     handlers: {
                         onSessionCreated: (info) =>
@@ -126,20 +122,12 @@ export const useKasookooStore = createSelectors(
                     `structured logging: ${loggingEnabled ? `on (${loggingLevels.join(", ")})` : "off"}`,
                     "ok"
                 )
-                if (telemetryEnabled) {
-                    addLog(
-                        `OpenTelemetry export: on → Kasookoo's monitoring collector (always)${
-                            telemetryEndpoint ? ` + ${telemetryEndpoint}` : ""
-                        }`,
-                        "ok"
-                    )
-                    if (!loggingEnabled) {
-                        addLog(
-                            "logging.enabled and telemetry.enabled are independent — console is silent but OTel still receives every log line",
-                            "ok"
-                        )
-                    }
-                }
+                addLog(
+                    `OpenTelemetry export: automatic → Kasookoo's monitoring collector (always)${
+                        telemetryEndpoint ? ` + ${telemetryEndpoint}` : ""
+                    }`,
+                    "ok"
+                )
             } catch (err) {
                 clientRef = null
                 storage.setConnected(false)
@@ -156,7 +144,6 @@ export const useKasookooStore = createSelectors(
             useCustomWindow: storage.getCustomWindow(),
             loggingEnabled: storage.getLoggingEnabled(),
             loggingLevels: storage.getLoggingLevels() as LogLevel[],
-            telemetryEnabled: storage.getTelemetryEnabled(),
             telemetryEndpoint: storage.getTelemetryEndpoint(),
             client: null,
             status: "idle",
@@ -192,10 +179,6 @@ export const useKasookooStore = createSelectors(
                 storage.setLoggingLevels(value)
                 set({ loggingLevels: value })
             },
-            setTelemetryEnabled: (value) => {
-                storage.setTelemetryEnabled(value)
-                set({ telemetryEnabled: value })
-            },
             setTelemetryEndpoint: (value) => {
                 storage.setTelemetryEndpoint(value)
                 set({ telemetryEndpoint: value })
@@ -207,7 +190,6 @@ export const useKasookooStore = createSelectors(
                     useCustomWindow,
                     loggingEnabled,
                     loggingLevels,
-                    telemetryEnabled,
                     telemetryEndpoint,
                 } = get()
                 if (!auth || !publishableKey.trim()) return
@@ -217,7 +199,6 @@ export const useKasookooStore = createSelectors(
                     useCustomWindow,
                     loggingEnabled,
                     loggingLevels,
-                    telemetryEnabled,
                     telemetryEndpoint.trim()
                 )
             },
@@ -265,8 +246,6 @@ export function useKasookoo() {
         setLoggingEnabled: useKasookooStore.use.setLoggingEnabled(),
         loggingLevels: useKasookooStore.use.loggingLevels(),
         setLoggingLevels: useKasookooStore.use.setLoggingLevels(),
-        telemetryEnabled: useKasookooStore.use.telemetryEnabled(),
-        setTelemetryEnabled: useKasookooStore.use.setTelemetryEnabled(),
         telemetryEndpoint: useKasookooStore.use.telemetryEndpoint(),
         setTelemetryEndpoint: useKasookooStore.use.setTelemetryEndpoint(),
         connect: useKasookooStore.use.connect(),
