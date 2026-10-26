@@ -4,6 +4,7 @@ export type ScreenId =
     | "session"
     | "calls"
     | "sip"
+    | "clicktocall"
     | "messaging"
     | "cdr"
     | "users"
@@ -21,6 +22,7 @@ export const SCREENS: ScreenMeta[] = [
     { id: "session", label: "Session", icon: "◈" },
     { id: "calls", label: "Calls", icon: "☏", scope: "in_app_calling" },
     { id: "sip", label: "Phone (SIP)", icon: "⌗", scope: "sip_calling" },
+    { id: "clicktocall", label: "Click to call", icon: "☎" },
     { id: "messaging", label: "Messaging", icon: "✉", scope: "in_app_messaging" },
     { id: "cdr", label: "Call records", icon: "▤", scope: "cdr" },
     { id: "users", label: "Users", icon: "⚇", scope: "user" },

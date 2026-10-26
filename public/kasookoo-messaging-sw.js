@@ -1,10 +1,14 @@
 /**
  * Kasookoo SDK — Firebase messaging service worker.
  *
- * Copy this file AS-IS into your app's public/static folder so it is served
- * from your site root as `/firebase-messaging-sw.js`, e.g.:
+ * Installed automatically into your app's public/static folder as
+ * `kasookoo-messaging-sw.js` (served from your site root), or manually with:
  *
- *   cp node_modules/kasookoo-sdk/firebase-messaging-sw.js public/
+ *   npx kasookoo-sdk --out <your-public-dir>
+ *
+ * Its name is unique to Kasookoo, so it never overwrites or replaces your own
+ * Firebase `firebase-messaging-sw.js`; the SDK registers it under its own
+ * scope (`/kasookoo-push/`) so the two workers run side by side.
  *
  * It is required by browser push: the FCM device token cannot be created
  * without a service worker, and it displays notifications for pushes that
@@ -31,7 +35,11 @@ firebase.initializeApp({
 const messaging = firebase.messaging();
 
 // Bumped whenever this file changes, so the SDK can warn about a stale copy.
-const KASOOKOO_SW_VERSION = 2;
+const KASOOKOO_SW_VERSION = 3;
+
+// Take over from an older copy straight away, so the version the SDK checks
+// is the one actually running.
+self.addEventListener('install', () => self.skipWaiting());
 
 // Fires only when no page of your app is visible — a minimised browser, or the
 // user on another tab. The page itself is still alive in both cases, so hand it

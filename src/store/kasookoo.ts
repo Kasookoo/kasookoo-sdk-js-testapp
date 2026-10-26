@@ -2,6 +2,7 @@ import { create } from "zustand"
 import type { Call, KasookooClient, LogLevel } from "kasookoo-sdk"
 import { createSelectors } from "../lib/createSelectors"
 import { closeKasookoo, initKasookoo } from "../kasookoo"
+import { closeClickToCall } from "../kasookoo/clickToCall"
 import { storage } from "../lib/storage"
 import { describeError } from "../lib/format"
 import type { LoginResult } from "../api"
@@ -159,6 +160,7 @@ export const useKasookooStore = createSelectors(
                 set({ auth })
             },
             signOut: () => {
+                closeClickToCall()
                 teardown()
                 storage.clearAll()
                 set({ auth: null, publishableKey: "" })

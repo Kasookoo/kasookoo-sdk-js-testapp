@@ -3,7 +3,7 @@
 // the host app to already know who the user is (the `subject` passed to
 // `KasookooClient.init()`). Everything else goes through kasookoo-sdk.
 
-const BOT_BASE = "https://webrtc-test.kasookoo.ai/api"
+export const BOT_BASE = "https://webrtc-test.kasookoo.ai/api"
 
 export interface BotUser {
     id: string
