@@ -5,6 +5,7 @@ import { ConnectScreen } from "./screens/ConnectScreen"
 import { SessionScreen } from "./screens/SessionScreen"
 import { CallsScreen } from "./screens/CallsScreen"
 import { SipScreen } from "./screens/SipScreen"
+import { ClickToCallScreen } from "./screens/ClickToCallScreen"
 import { MessagingScreen } from "./screens/MessagingScreen"
 import { CdrScreen } from "./screens/CdrScreen"
 import { UsersScreen } from "./screens/UsersScreen"
@@ -73,6 +74,8 @@ function ScreenBody({ screen, restoring }: { screen: ScreenId; restoring?: boole
             return <CallsScreen />
         case "sip":
             return <SipScreen />
+        case "clicktocall":
+            return <ClickToCallScreen />
         case "messaging":
             return <MessagingScreen />
         case "cdr":
