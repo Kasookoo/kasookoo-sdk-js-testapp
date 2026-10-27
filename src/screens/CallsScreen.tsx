@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react"
 import type { UserRecord } from "kasookoo-sdk"
 import { useKasookoo } from "../store/kasookoo"
-import { answerCall, declineCall, listUsers, placeCall } from "../kasookoo"
+import { answerCall, declineCall, listUsers, placeCall, placeSupportCall } from "../kasookoo"
 import { Badge, Button, EmptyState, Input, Panel, Spinner } from "../components/ui"
 import { describeError, fullName } from "../lib/format"
 import { ActiveCallBar } from "../components/ActiveCallBar"
@@ -12,6 +12,10 @@ export function CallsScreen() {
     const [busy, setBusy] = useState(false)
     const [search, setSearch] = useState("")
     const [role, setRole] = useState("")
+    const [supportRecording, setSupportRecording] = useState<"record" | "no_record">("record")
+    const [supportName, setSupportName] = useState("")
+    const [supportLabel, setSupportLabel] = useState("")
+    const [supportBusy, setSupportBusy] = useState(false)
     const canListUsers = has("user")
     const canCall = !!auth?.user.phone_number
 
@@ -52,6 +56,30 @@ export function CallsScreen() {
         }
     }
 
+    const callSupport = async () => {
+        if (!client) return
+        setSupportBusy(true)
+        addLog("initSupportCall → all signed-in admins")
+        try {
+            const res = await placeSupportCall(client, {
+                isCallRecording: supportRecording === "record",
+                callerName: supportName,
+                supportLabel,
+            })
+            addLog(
+                `support call ${res.roomName} → notified ${res.notified} admin(s) via ${res.calleeTokenDelivery}` +
+                    (res.notified === 0 ? " (nobody online — still ringing)" : ""),
+                res.notified > 0 ? "ok" : "info"
+            )
+            res.call.on("state", (state) => addLog(`call ${res.roomName} → ${state}`, state === "connected" ? "ok" : "info"))
+            res.call.on("error", (err) => addLog(`call error ${describeError(err)}`, "err"))
+        } catch (err) {
+            addLog(`initSupportCall failed ${describeError(err)}`, "err")
+        } finally {
+            setSupportBusy(false)
+        }
+    }
+
     return (
         <div className="flex flex-col gap-6">
             <header>
@@ -62,6 +90,35 @@ export function CallsScreen() {
             </header>
 
             <ActiveCallBar />
+
+            <Panel
+                title="Support call"
+                description="initSupportCall() — rings every admin signed in to the admin portal. Recording must be chosen explicitly."
+            >
+                <div className="flex flex-wrap items-end gap-3">
+                    <select
+                        className="rounded-lg border border-black/10 bg-transparent px-3 py-2 text-sm dark:border-white/15"
+                        value={supportRecording}
+                        onChange={(e) => setSupportRecording(e.target.value as "record" | "no_record")}
+                    >
+                        <option value="record">Record the call</option>
+                        <option value="no_record">Don't record</option>
+                    </select>
+                    <Input
+                        placeholder="Caller name (default: you)"
+                        value={supportName}
+                        onChange={(e) => setSupportName(e.target.value)}
+                    />
+                    <Input
+                        placeholder='Window label (default: "Support")'
+                        value={supportLabel}
+                        onChange={(e) => setSupportLabel(e.target.value)}
+                    />
+                    <Button variant="teal" onClick={() => void callSupport()} loading={supportBusy} disabled={!client}>
+                        Call support
+                    </Button>
+                </div>
+            </Panel>
 
             {!canCall ? (
                 <Panel title="In-app calls disabled">
