@@ -29,6 +29,23 @@ export class BotApiError extends Error {
     }
 }
 
+/**
+ * `detail` is a string for most errors, but FastAPI validation errors (422)
+ * send a list of `{ loc, msg }` objects — e.g. `body.email: value is not a valid email address`.
+ */
+function errorMessage(detail: unknown): string | undefined {
+    if (typeof detail === "string") return detail
+    if (!Array.isArray(detail)) return undefined
+    const messages = detail.flatMap((item) => {
+        if (typeof item === "string") return [item]
+        const { loc, msg } = (item ?? {}) as { loc?: unknown; msg?: unknown }
+        if (typeof msg !== "string") return []
+        const field = Array.isArray(loc) ? loc.filter((part) => part !== "body").join(".") : ""
+        return [field ? `${field}: ${msg}` : msg]
+    })
+    return messages.length ? messages.join("; ") : undefined
+}
+
 async function botRequest<T>(path: string, options: { method?: string; token?: string; body?: unknown } = {}): Promise<T> {
     const res = await fetch(`${BOT_BASE}${path}`, {
         method: options.method ?? "GET",
@@ -41,8 +58,7 @@ async function botRequest<T>(path: string, options: { method?: string; token?: s
     })
     const data = await res.json().catch(() => undefined)
     if (!res.ok) {
-        const detail = (data as { detail?: unknown })?.detail
-        throw new BotApiError(typeof detail === "string" ? detail : `Request failed (${res.status})`, res.status)
+        throw new BotApiError(errorMessage((data as { detail?: unknown })?.detail) ?? `Request failed (${res.status})`, res.status)
     }
     return data as T
 }
