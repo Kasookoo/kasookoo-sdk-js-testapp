@@ -3,7 +3,9 @@
 // the host app to already know who the user is (the `subject` passed to
 // `KasookooClient.init()`). Everything else goes through kasookoo-sdk.
 
-export const BOT_BASE = "https://webrtc-test.kasookoo.ai/api"
+// Set VITE_BOT_BASE per Vercel environment (Production → https://webrtc.kasookoo.ai/api).
+// Falls back to the test backend so local dev and Preview work with no config.
+export const BOT_BASE = (import.meta.env.VITE_BOT_BASE || "https://webrtc-test.kasookoo.ai/api").replace(/\/+$/, "")
 
 export interface BotUser {
     id: string
