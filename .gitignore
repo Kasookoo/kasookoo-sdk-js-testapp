@@ -11,12 +11,11 @@ node_modules
 dist
 dist-ssr
 *.local
+temp_auto_push.bat
 package-lock.json
 tsconfig.tsbuildinfo
 
 # Editor directories and files
-.vscode/*
-!.vscode/extensions.json
 .idea
 .DS_Store
 *.suo
@@ -27,3 +26,5 @@ tsconfig.tsbuildinfo
 
 .vercel
 .env*
+.gitignore
+branch_structure.json
