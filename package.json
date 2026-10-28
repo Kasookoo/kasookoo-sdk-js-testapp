@@ -4,8 +4,8 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "tsc -b && vite build",
+    "dev": "node init && vite",
+    "build": "node init && tsc -b && vite build",
     "preview": "vite preview"
   },
   "dependencies": {
@@ -22,8 +22,10 @@
     "@opentelemetry/sdk-trace-web": "^1.30.0",
     "@opentelemetry/semantic-conventions": "^1.28.0",
     "@tailwindcss/vite": "^4.3.3",
+    "dotenv": "^8.2.0",
     "kasookoo-click-to-call-widget": "^0.1.0-beta.26",
     "kasookoo-sdk": "^0.5.2",
+    "node-fetch": "^3.3.2",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "tailwindcss": "^4.3.3",
