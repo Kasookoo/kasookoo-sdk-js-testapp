@@ -32,6 +32,23 @@ firebase.initializeApp({
     measurementId: "G-QVD0JRWHK0"
 });
 
+// Registered BEFORE firebase.messaging() on purpose: for notifications Firebase
+// displays itself, its own click handler closes them and stops here when no link
+// is set, so the app would never be focused. Listeners run in registration order,
+// so ours goes first and stops Firebase's from running.
+self.addEventListener('notificationclick', (event) => {
+    event.stopImmediatePropagation();
+    event.notification.close();
+    event.waitUntil(
+        self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clients) => {
+            for (const client of clients) {
+                if ('focus' in client) return client.focus();
+            }
+            return self.clients.openWindow('/');
+        })
+    );
+});
+
 const messaging = firebase.messaging();
 
 // Bumped whenever this file changes, so the SDK can warn about a stale copy.
@@ -66,6 +83,10 @@ messaging.onBackgroundMessage((payload) => {
             // Best effort — the notification below is still shown either way.
         });
 
+    // When the push carries a `notification` block, the Firebase SDK has already
+    // displayed it before this handler runs; showing it again made it appear twice.
+    if (payload.notification) return;
+
     self.registration.showNotification(title, {
         body,
         tag: data.room_name || data.conversation_id || undefined,
@@ -79,17 +100,4 @@ self.addEventListener('message', (event) => {
         const reply = { source: 'kasookoo-sdk', version: KASOOKOO_SW_VERSION, type: 'pong' };
         if (event.source) event.source.postMessage(reply);
     }
-});
-
-
-self.addEventListener('notificationclick', (event) => {
-    event.notification.close();
-    event.waitUntil(
-        self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clients) => {
-            for (const client of clients) {
-                if ('focus' in client) return client.focus();
-            }
-            return self.clients.openWindow('/');
-        })
-    );
 });
