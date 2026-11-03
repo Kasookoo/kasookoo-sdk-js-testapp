@@ -9,6 +9,7 @@ const KEYS = {
     publishableKey: "kasookoo.pk",
     connected: "kasookoo.connected",
     customWindow: "kasookoo.customWindow",
+    singleSession: "kasookoo.singleSession",
     screen: "kasookoo.screen",
     loggingEnabled: "kasookoo.loggingEnabled",
     loggingLevels: "kasookoo.loggingLevels",
@@ -57,6 +58,10 @@ export const storage = {
 
     getCustomWindow: () => read<boolean>(KEYS.customWindow) === true,
     setCustomWindow: (value: boolean) => write(KEYS.customWindow, value),
+
+    /** `singleSession` — a new sign-in signs the user out of their other devices. Off by default, like the SDK. */
+    getSingleSession: () => read<boolean>(KEYS.singleSession) === true,
+    setSingleSession: (value: boolean) => write(KEYS.singleSession, value),
 
     /** Structured console logging — on by default, same as the SDK's own default. */
     getLoggingEnabled: () => read<boolean>(KEYS.loggingEnabled) ?? true,

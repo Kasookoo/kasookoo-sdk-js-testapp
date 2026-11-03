@@ -16,6 +16,8 @@ export async function initKasookoo(
     publishableKey: string,
     options: {
         useCustomWindow?: boolean
+        /** Sign the user out of their other devices on a new sign-in (the SDK's `singleSession`). */
+        singleSession?: boolean
         loggingEnabled?: boolean
         /**
          * Which level(s) to show — an exact set, not a minimum threshold (see
@@ -36,6 +38,7 @@ export async function initKasookoo(
     const client = await KasookooClient.init({
         publishableKey,
         subject: email,
+        singleSession: options.singleSession,
         callWindow: options.useCustomWindow ? customCallWindow : undefined,
         logging: {
             enabled: options.loggingEnabled ?? true,
