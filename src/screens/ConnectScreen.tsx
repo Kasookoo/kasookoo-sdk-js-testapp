@@ -13,6 +13,8 @@ export function ConnectScreen() {
         setPublishableKey,
         useCustomWindow,
         setUseCustomWindow,
+        singleSession,
+        setSingleSession,
         loggingEnabled,
         setLoggingEnabled,
         loggingLevels,
@@ -64,6 +66,20 @@ export function ConnectScreen() {
                     <span>
                         Use the custom call window
                         <span className="block text-xs text-foreground/50">the dark example in src/customCallWindow.ts</span>
+                    </span>
+                </label>
+
+                <label className="flex items-center gap-2 text-sm">
+                    <input
+                        type="checkbox"
+                        checked={singleSession}
+                        onChange={(e) => setSingleSession(e.target.checked)}
+                    />
+                    <span>
+                        One device per user (<code>singleSession</code>)
+                        <span className="block text-xs text-foreground/50">
+                            a new sign-in revokes the user's other sessions — they get "Session revoked" (401)
+                        </span>
                     </span>
                 </label>
 

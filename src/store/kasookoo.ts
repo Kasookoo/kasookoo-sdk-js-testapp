@@ -21,6 +21,7 @@ interface KasookooState {
     auth: LoginResult | null
     publishableKey: string
     useCustomWindow: boolean
+    singleSession: boolean
     loggingEnabled: boolean
     loggingLevels: LogLevel[]
     telemetryEndpoint: string
@@ -37,6 +38,7 @@ interface KasookooState {
     signOut: () => void
     setPublishableKey: (value: string) => void
     setUseCustomWindow: (value: boolean) => void
+    setSingleSession: (value: boolean) => void
     setLoggingEnabled: (value: boolean) => void
     setLoggingLevels: (value: LogLevel[]) => void
     setTelemetryEndpoint: (value: string) => void
@@ -69,6 +71,7 @@ export const useKasookooStore = createSelectors(
             account: LoginResult,
             key: string,
             custom: boolean,
+            singleSession: boolean,
             loggingEnabled: boolean,
             loggingLevels: LogLevel[],
             telemetryEndpoint: string
@@ -80,6 +83,7 @@ export const useKasookooStore = createSelectors(
             try {
                 const created = await initKasookoo(account.user.email, key, {
                     useCustomWindow: custom,
+                    singleSession,
                     loggingEnabled,
                     loggingLevels,
                     telemetryEndpoint,
@@ -143,6 +147,7 @@ export const useKasookooStore = createSelectors(
             auth: storage.getAuth<LoginResult>(),
             publishableKey: storage.getPublishableKey(),
             useCustomWindow: storage.getCustomWindow(),
+            singleSession: storage.getSingleSession(),
             loggingEnabled: storage.getLoggingEnabled(),
             loggingLevels: storage.getLoggingLevels() as LogLevel[],
             telemetryEndpoint: storage.getTelemetryEndpoint(),
@@ -173,6 +178,10 @@ export const useKasookooStore = createSelectors(
                 storage.setCustomWindow(value)
                 set({ useCustomWindow: value })
             },
+            setSingleSession: (value) => {
+                storage.setSingleSession(value)
+                set({ singleSession: value })
+            },
             setLoggingEnabled: (value) => {
                 storage.setLoggingEnabled(value)
                 set({ loggingEnabled: value })
@@ -190,6 +199,7 @@ export const useKasookooStore = createSelectors(
                     auth,
                     publishableKey,
                     useCustomWindow,
+                    singleSession,
                     loggingEnabled,
                     loggingLevels,
                     telemetryEndpoint,
@@ -199,6 +209,7 @@ export const useKasookooStore = createSelectors(
                     auth,
                     publishableKey.trim(),
                     useCustomWindow,
+                    singleSession,
                     loggingEnabled,
                     loggingLevels,
                     telemetryEndpoint.trim()
@@ -244,6 +255,8 @@ export function useKasookoo() {
         setPublishableKey: useKasookooStore.use.setPublishableKey(),
         useCustomWindow: useKasookooStore.use.useCustomWindow(),
         setUseCustomWindow: useKasookooStore.use.setUseCustomWindow(),
+        singleSession: useKasookooStore.use.singleSession(),
+        setSingleSession: useKasookooStore.use.setSingleSession(),
         loggingEnabled: useKasookooStore.use.loggingEnabled(),
         setLoggingEnabled: useKasookooStore.use.setLoggingEnabled(),
         loggingLevels: useKasookooStore.use.loggingLevels(),
