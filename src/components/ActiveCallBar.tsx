@@ -57,7 +57,7 @@ export function ActiveCallBar() {
                 <div>
                     <p className="text-sm font-medium">{call.remote.name}</p>
                     <p className="text-xs text-foreground/60">
-                        {call.kind === "sip" ? "phone" : "in-app"} · {state}
+                        {call.kind.replace("_", "-")} · {state}
                     </p>
                 </div>
             </div>
