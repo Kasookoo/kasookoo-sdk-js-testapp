@@ -93,7 +93,7 @@ export function CallsScreen() {
 
             <Panel
                 title="Support call"
-                description="initSupportCall() — rings every admin signed in to the admin portal. Recording must be chosen explicitly."
+                description="initSupportCall() — rings every admin signed in to the admin portal. Recording is off unless you choose to record."
             >
                 <div className="flex flex-wrap items-end gap-3">
                     <select
