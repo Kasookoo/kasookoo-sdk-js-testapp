@@ -11,6 +11,7 @@ export interface CallParty {
 
 export function placeCall(client: KasookooClient, caller: CallParty, callee: CallParty): Promise<Call> {
     return client.initCall({
+        isCallRecording: true,
         roomName: `room_${caller.id}_${callee.id}_${Date.now()}`,
         caller: { name: caller.name, email: caller.email, phoneNumber: caller.phoneNumber ?? "", type: caller.role },
         callee: { name: callee.name, email: callee.email, phoneNumber: callee.phoneNumber ?? "", type: callee.role },
@@ -19,7 +20,7 @@ export function placeCall(client: KasookooClient, caller: CallParty, callee: Cal
 
 /**
  * Rings every admin signed in to the admin portal. `isCallRecording` is
- * required; `callerName` defaults to the signed-in user and `supportLabel`
+ * optional and defaults to false (not recorded); `callerName` defaults to the signed-in user and `supportLabel`
  * to "Support" when left empty.
  */
 export function placeSupportCall(
