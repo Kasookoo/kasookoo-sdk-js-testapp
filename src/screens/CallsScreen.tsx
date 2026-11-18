@@ -67,7 +67,7 @@ export function CallsScreen() {
                 supportLabel,
             })
             addLog(
-                `support call ${res.roomName} → notified ${res.notified} admin(s) via ${res.calleeTokenDelivery}` +
+                `support call ${res.roomName} → notified ${res.notified} admin(s)` +
                     (res.notified === 0 ? " (nobody online — still ringing)" : ""),
                 res.notified > 0 ? "ok" : "info"
             )
