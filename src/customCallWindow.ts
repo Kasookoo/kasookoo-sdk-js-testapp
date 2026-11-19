@@ -91,7 +91,8 @@ export const customCallWindow: CallWindowRenderer = (container, call) => {
     const render = () => {
         // Same label for both kinds — "connecting" means not yet connected
         // either way, regardless of how long it takes to get there.
-        status.textContent = call.state
+        status.textContent =
+            call.state === "connected" && call.held ? "on hold" : call.state === "connected" && call.remoteHeld ? "on hold by them" : call.state
         controls.innerHTML = ""
 
         // Unreachable for phone calls — they never ring in.
@@ -105,6 +106,11 @@ export const customCallWindow: CallWindowRenderer = (container, call) => {
             controls.appendChild(
                 button(call.muted ? "Unmute" : "Mute", "#4b3f8a", () => void call.setMuted(!call.muted).then(render))
             )
+            if (call.kind !== "phone") {
+                controls.appendChild(
+                    button(call.held ? "Resume" : "Hold", "#7a6a1f", () => void (call.held ? call.resume() : call.hold()).catch(() => {}))
+                )
+            }
             if (!interval) startTimer()
         }
 
@@ -113,6 +119,7 @@ export const customCallWindow: CallWindowRenderer = (container, call) => {
 
     render()
     const offState = call.on("state", render)
+    const offHold = call.on("hold", render)
 
     // Draggable via the header, same convention as the SDK's own default window.
     let drag: { startX: number; startY: number; baseX: number; baseY: number } | null = null
@@ -130,6 +137,7 @@ export const customCallWindow: CallWindowRenderer = (container, call) => {
 
     return () => {
         offState()
+        offHold()
         if (interval) clearInterval(interval)
     }
 }
