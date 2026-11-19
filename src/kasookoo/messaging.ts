@@ -58,9 +58,13 @@ export function sendLocation(
     return client.sendLocation(params)
 }
 
-/** Deletes a conversation along with its messages. */
-export function deleteConversation(client: KasookooClient, conversationId: string): Promise<DeleteConversationResponse> {
-    return client.deleteConversation(conversationId)
+/** Removes a conversation from this user's list; `deleteForEveryone` also deletes every message for both sides. */
+export function deleteConversation(
+    client: KasookooClient,
+    conversationId: string,
+    deleteForEveryone = false
+): Promise<DeleteConversationResponse> {
+    return client.deleteConversation(conversationId, { deleteForEveryone })
 }
 
 /** Deletes a single message. */
