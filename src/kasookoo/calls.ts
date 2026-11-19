@@ -67,6 +67,10 @@ export function setCallMuted(call: Call, muted: boolean): Promise<void> {
 }
 
 
+export function holdCall(call: Call, hold: boolean): Promise<void> {
+    return hold ? call.hold() : call.resume()
+}
+
 export function getActiveCall(client: KasookooClient): Call | null {
     return client.activeCall
 }

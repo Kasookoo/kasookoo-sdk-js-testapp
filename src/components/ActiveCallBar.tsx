@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react"
 import type { Call, CallState } from "kasookoo-sdk"
 import { useKasookoo } from "../store/kasookoo"
-import { endCall, getActiveCall, setCallMuted } from "../kasookoo"
+import { endCall, getActiveCall, holdCall, setCallMuted } from "../kasookoo"
 import { Badge, Button } from "./ui"
 import { formatClock } from "../lib/format"
 
@@ -15,6 +15,7 @@ export function ActiveCallBar() {
     const [call, setCall] = useState<Call | null>(null)
     const [state, setState] = useState<CallState | null>(null)
     const [muted, setMuted] = useState(false)
+    const [hold, setHold] = useState({ held: false, remoteHeld: false })
     const [seconds, setSeconds] = useState(0)
 
     // The SDK owns the call; poll for the active one rather than duplicating its bookkeeping.
@@ -31,13 +32,22 @@ export function ActiveCallBar() {
         if (!call) {
             setState(null)
             setMuted(false)
+            setHold({ held: false, remoteHeld: false })
             setSeconds(0)
             return
         }
         setState(call.state)
         setMuted(call.muted)
-        const off = call.on("state", setState)
-        return off
+        setHold({ held: call.held, remoteHeld: call.remoteHeld })
+        const offState = call.on("state", setState)
+        const offHold = call.on("hold", (next) => {
+            setHold(next)
+            addLog(`call hold: you=${next.held} them=${next.remoteHeld}`)
+        })
+        return () => {
+            offState()
+            offHold()
+        }
     }, [call])
 
     // Count only from pickup, never from mount — a SIP call can ring for a while.
@@ -57,7 +67,7 @@ export function ActiveCallBar() {
                 <div>
                     <p className="text-sm font-medium">{call.remote.name}</p>
                     <p className="text-xs text-foreground/60">
-                        {call.kind.replace("_", "-")} · {state}
+                        {call.kind.replace("_", "-")} · {hold.held ? "on hold" : hold.remoteHeld ? "on hold by them" : state}
                     </p>
                 </div>
             </div>
@@ -65,6 +75,16 @@ export function ActiveCallBar() {
             {state === "connected" ? <Badge tone="ok">{formatClock(seconds)}</Badge> : null}
 
             <div className="ml-auto flex gap-2">
+                {state === "connected" && call.kind !== "phone" ? (
+                    <Button
+                        variant="secondary"
+                        onClick={() => {
+                            holdCall(call, !hold.held).catch((err) => addLog(`call hold failed: ${err?.code ?? err}`))
+                        }}
+                    >
+                        {hold.held ? "Resume" : "Hold"}
+                    </Button>
+                ) : null}
                 {state === "connected" ? (
                     <Button
                         variant="secondary"
