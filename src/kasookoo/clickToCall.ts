@@ -2,6 +2,7 @@ import { KasookooClickToCall } from "kasookoo-click-to-call-widget"
 import { BOT_BASE } from "../api"
 import { storage } from "../lib/storage"
 import type { LoginResult } from "../api"
+import type { LogLevel } from "kasookoo-sdk"
 
 /**
  * The click-to-call widget is a singleton with its own session, separate from
@@ -28,6 +29,14 @@ export function initClickToCall(auth: LoginResult, publishableKey: string): Prom
         },
     })
     instance = created
+    // The widget prints nothing itself; show its log lines with the same toggle and levels as the SDK's.
+    void created.then((widget) => {
+        if (!storage.getLoggingEnabled()) return
+        const shown = storage.getLoggingLevels() as LogLevel[]
+        widget.on("log", (entry) => {
+            if (shown.includes(entry.level)) console[entry.level](JSON.stringify(entry))
+        })
+    }).catch(() => {})
     created.catch(() => {
         if (instance === created) {
             instance = null
