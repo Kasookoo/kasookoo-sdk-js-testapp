@@ -20,9 +20,9 @@ export async function initKasookoo(
         singleSession?: boolean
         loggingEnabled?: boolean
         /**
-         * Which level(s) to show — an exact set, not a minimum threshold (see
-         * the SDK README's "Console logging"). Defaults to the SDK's own
-         * default (`["info", "warn", "error"]`) when omitted.
+         * Which level(s) of the SDK's `log` event to print to the console (see
+         * the SDK README's "Logs"). The SDK itself no longer prints anything;
+         * this app does, from the event. Defaults to `["info", "warn", "error"]`.
          */
         loggingLevels?: LogLevel[]
         /**
@@ -41,13 +41,19 @@ export async function initKasookoo(
         singleSession: options.singleSession,
         callWindow: options.useCustomWindow ? customCallWindow : undefined,
         logging: {
-            enabled: options.loggingEnabled ?? true,
-            level: options.loggingLevels?.length ? options.loggingLevels : undefined,
             service: "kasookoo-sdk-test-app",
             env: "test",
         },
         telemetry: { endpoint: options.telemetryEndpoint || undefined, serviceName: "kasookoo-sdk-test-app", environment: "test" },
     })
+    // The SDK never prints to the console: it emits `log` lines (those from
+    // init() are replayed here) and the app decides what to show.
+    if (options.loggingEnabled ?? true) {
+        const shown = options.loggingLevels?.length ? options.loggingLevels : (["info", "warn", "error"] as LogLevel[])
+        client.on("log", (entry) => {
+            if (shown.includes(entry.level)) console[entry.level](JSON.stringify(entry))
+        })
+    }
     subscribeToKasookooEvents(client, options.handlers)
     return client
 }
