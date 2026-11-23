@@ -116,13 +116,17 @@ export function MessagingScreen() {
         }
     }
 
-    const deleteConversation = async () => {
+    const deleteConversation = async (deleteForEveryone: boolean) => {
         if (!client || !selected) return
-        if (!window.confirm(`Delete conversation with ${selected.participant_name ?? selected.participant_user_id}? This deletes its messages too.`)) return
+        const who = selected.participant_name ?? selected.participant_user_id
+        const question = deleteForEveryone
+            ? `Delete the conversation with ${who} and all its messages for both of you? This cannot be undone.`
+            : `Remove the conversation with ${who} from your list? They keep their copy.`
+        if (!window.confirm(question)) return
         setDeletingConv(true)
         try {
-            const res = await kasookoo.deleteConversation(client, selected.conversation_id)
-            addLog(`deleteConversation → ${res.conversation_id}`, "ok")
+            const res = await kasookoo.deleteConversation(client, selected.conversation_id, deleteForEveryone)
+            addLog(`deleteConversation → ${res.conversation_id} (delete_messages: ${res.delete_messages})`, "ok")
             setSelected(null)
             setMessages([])
             setConvUnread(null)
@@ -239,8 +243,11 @@ export function MessagingScreen() {
                         selected ? (
                             <div className="flex items-center gap-2">
                                 {convUnread != null ? <Badge>{convUnread} unread here</Badge> : null}
-                                <Button variant="secondary" onClick={() => void deleteConversation()} loading={deletingConv}>
-                                    Delete conversation
+                                <Button variant="secondary" onClick={() => void deleteConversation(false)} loading={deletingConv}>
+                                    Remove conversation
+                                </Button>
+                                <Button variant="danger" onClick={() => void deleteConversation(true)} loading={deletingConv}>
+                                    Delete for everyone
                                 </Button>
                             </div>
                         ) : undefined
