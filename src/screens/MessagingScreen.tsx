@@ -120,13 +120,13 @@ export function MessagingScreen() {
         if (!client || !selected) return
         const who = selected.participant_name ?? selected.participant_user_id
         const question = deleteForEveryone
-            ? `Delete the conversation with ${who} and all its messages for both of you? This cannot be undone.`
-            : `Remove the conversation with ${who} from your list? They keep their copy.`
+            ? `Delete the conversation with ${who} and also remove the messages you sent from their view? This cannot be undone.`
+            : `Remove the conversation with ${who} and all its messages from your view? They keep their copy.`
         if (!window.confirm(question)) return
         setDeletingConv(true)
         try {
             const res = await kasookoo.deleteConversation(client, selected.conversation_id, deleteForEveryone)
-            addLog(`deleteConversation → ${res.conversation_id} (delete_messages: ${res.delete_messages})`, "ok")
+            addLog(`deleteConversation → ${res.conversation_id} (delete_messages: ${res.delete_messages}, scope: ${res.scope})`, "ok")
             setSelected(null)
             setMessages([])
             setConvUnread(null)
@@ -144,7 +144,7 @@ export function MessagingScreen() {
         setDeletingMsgId(messageId)
         try {
             const res = await kasookoo.deleteMessage(client, messageId)
-            addLog(`deleteMessage → ${res.message_id}`, "ok")
+            addLog(`deleteMessage → ${res.message_id} (scope: ${res.scope})`, "ok")
             setMessages((prev) => prev.filter((m) => m.id !== messageId))
         } catch (err) {
             addLog(`deleteMessage failed ${describeError(err)}`, "err")
@@ -247,7 +247,7 @@ export function MessagingScreen() {
                                     Remove conversation
                                 </Button>
                                 <Button variant="danger" onClick={() => void deleteConversation(true)} loading={deletingConv}>
-                                    Delete for everyone
+                                    Also remove my messages for them
                                 </Button>
                             </div>
                         ) : undefined
