@@ -58,7 +58,7 @@ export function sendLocation(
     return client.sendLocation(params)
 }
 
-/** Removes a conversation from this user's list; `deleteForEveryone` also deletes every message for both sides. */
+/** Removes a conversation and its messages from this user's view; `deleteForEveryone` also removes the messages this user sent from the other side's view. */
 export function deleteConversation(
     client: KasookooClient,
     conversationId: string,
