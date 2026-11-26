@@ -61,6 +61,11 @@ export const customCallWindow: CallWindowRenderer = (container, call) => {
                 <div style="font-size:11px;color:#8b81b8;">${KIND_LABEL[call.kind] ?? (call.direction === "outgoing" ? "Outgoing" : "Incoming")} · custom window</div>
             </div>
         </div>
+        <div class="ccw-keypad" style="display:none; padding:0 14px 12px;">
+            <div class="ccw-typed" style="min-height:20px; font-size:15px; text-align:center; overflow:hidden; white-space:nowrap;"></div>
+            <div class="ccw-keys" style="display:grid; grid-template-columns:repeat(3,1fr); gap:6px; margin-top:6px;"></div>
+            <div class="ccw-keypad-error" style="min-height:14px; margin-top:6px; font-size:11px; color:#ff9592; text-align:center;"></div>
+        </div>
         <div class="ccw-controls" style="display:flex; gap:8px; padding:12px 14px; background:#241f3d;"></div>
     `
     container.appendChild(card)
@@ -69,6 +74,23 @@ export const customCallWindow: CallWindowRenderer = (container, call) => {
     const timer = card.querySelector<HTMLElement>(".ccw-timer")!
     const controls = card.querySelector<HTMLElement>(".ccw-controls")!
     const header = card.querySelector<HTMLElement>(".ccw-header")!
+
+    // Keypad tones. The pad lives outside the controls, which are redrawn on every change.
+    const keypad = card.querySelector<HTMLElement>(".ccw-keypad")!
+    const typed = card.querySelector<HTMLElement>(".ccw-typed")!
+    const keypadError = card.querySelector<HTMLElement>(".ccw-keypad-error")!
+    let keypadOpen = false
+    for (const key of "123456789*0#") {
+        const btn = document.createElement("button")
+        btn.textContent = key
+        btn.style.cssText = "padding:8px; border:1px solid #3a3560; border-radius:8px; background:#2c2750; color:#fff; font-size:15px; cursor:pointer;"
+        btn.addEventListener("click", () => {
+            typed.textContent = `${typed.textContent}${key}`.slice(-20)
+            keypadError.textContent = ""
+            call.sendDtmf(key).catch((err) => (keypadError.textContent = `Couldn't send tone (${err?.code ?? err})`))
+        })
+        card.querySelector(".ccw-keys")!.appendChild(btn)
+    }
 
     let seconds = 0
     let interval: ReturnType<typeof setInterval> | null = null
@@ -94,6 +116,7 @@ export const customCallWindow: CallWindowRenderer = (container, call) => {
         status.textContent =
             call.state === "connected" && call.held ? "on hold" : call.state === "connected" && call.remoteHeld ? "on hold by them" : call.state
         controls.innerHTML = ""
+        keypad.style.display = keypadOpen && call.state === "connected" ? "block" : "none"
 
         // Unreachable for phone calls — they never ring in.
         if (call.state === "incoming") {
@@ -111,6 +134,12 @@ export const customCallWindow: CallWindowRenderer = (container, call) => {
                     button(call.held ? "Resume" : "Hold", "#7a6a1f", () => void (call.held ? call.resume() : call.hold()).catch(() => {}))
                 )
             }
+            controls.appendChild(
+                button(keypadOpen ? "Hide pad" : "Keypad", "#4b3f8a", () => {
+                    keypadOpen = !keypadOpen
+                    render()
+                })
+            )
             if (!interval) startTimer()
         }
 
