@@ -52,7 +52,7 @@ self.addEventListener('notificationclick', (event) => {
 const messaging = firebase.messaging();
 
 // Bumped whenever this file changes, so the SDK can warn about a stale copy.
-const KASOOKOO_SW_VERSION = 4;
+const KASOOKOO_SW_VERSION = 5;
 
 // Take over from an older copy straight away, so the version the SDK checks
 // is the one actually running.
@@ -83,10 +83,11 @@ messaging.onBackgroundMessage((payload) => {
             // Best effort — the notification below is still shown either way.
         });
 
-    // A read receipt is only for the page (it flips the "read" ticks), so it is never
-    // shown. Browsers want every push to end in a visible notification, so while no
-    // page is visible Chrome may show its own generic one in its place.
-    if (data.type === 'messages_read') return;
+    // Events marked silent (read receipts, deleted messages, ...) are only for the page,
+    // so they are never shown. Browsers want every push to end in a visible
+    // notification, so while no page is visible Chrome may show its own generic one in
+    // its place. `messages_read` is matched by type too, for servers that predate the marker.
+    if (data.silent === 'true' || data.type === 'messages_read') return;
 
     // When the push carries a `notification` block, the Firebase SDK has already
     // displayed it before this handler runs; showing it again made it appear twice.
