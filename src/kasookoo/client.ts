@@ -40,10 +40,6 @@ export async function initKasookoo(
         subject: email,
         singleSession: options.singleSession,
         callWindow: options.useCustomWindow ? customCallWindow : undefined,
-        logging: {
-            service: "kasookoo-sdk-test-app",
-            env: "test",
-        },
         telemetry: { endpoint: options.telemetryEndpoint || undefined, serviceName: "kasookoo-sdk-test-app", environment: "test" },
     })
     // The SDK never prints to the console: it emits `log` lines (those from

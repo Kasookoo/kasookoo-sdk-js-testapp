@@ -4,7 +4,7 @@
  * Installed automatically into your app's public/static folder as
  * `kasookoo-messaging-sw.js` (served from your site root), or manually with:
  *
- *   npx kasookoo-sdk --out <your-public-dir>
+ *   npx kasookoo-sdk install-worker --out <your-public-dir>
  *
  * Its name is unique to Kasookoo, so it never overwrites or replaces your own
  * Firebase `firebase-messaging-sw.js`; the SDK registers it under its own
@@ -54,7 +54,7 @@ const messaging = firebase.messaging();
 // Bumped whenever this file changes, so the SDK can warn about a stale copy.
 const KASOOKOO_SW_VERSION = 5;
 
-// Take over from an older copy straight away, so the version the SDK checks
+// Take over from any running copy straight away, so the version the SDK checks
 // is the one actually running.
 self.addEventListener('install', () => self.skipWaiting());
 
@@ -86,8 +86,8 @@ messaging.onBackgroundMessage((payload) => {
     // Events marked silent (read receipts, deleted messages, ...) are only for the page,
     // so they are never shown. Browsers want every push to end in a visible
     // notification, so while no page is visible Chrome may show its own generic one in
-    // its place. `messages_read` is matched by type too, for servers that predate the marker.
-    if (data.silent === 'true' || data.type === 'messages_read') return;
+    // its place.
+    if (data.silent === 'true') return;
 
     // When the push carries a `notification` block, the Firebase SDK has already
     // displayed it before this handler runs; showing it again made it appear twice.
